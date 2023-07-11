@@ -1,0 +1,47 @@
+body {
+    background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+}
+
+#display {
+    display: grid;
+    width: 200px;
+    margin: auto;
+    grid-template-columns: 200px;
+    grid-template-rows: 50px;
+    background-color: grey;
+    color: greenyellow;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 32px;
+    place-items: end;
+}
+
+#buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 50px);
+    grid-template-rows: repeat(5, 50px);
+    align-content: center;
+    justify-content: center;
+}
+.wide {
+    grid-column: span 2;
+}
+#buttons button {
+    height: 100%;
+    outline: none;
+}
+#buttons button {
+    background-color: grey;
+    color: white;
+    font-size: x-large;
+}
+#buttons .operator {
+    background-color: orange;
+}
+#buttons button:active {
+    background-color: lightgray;
+}
+#buttons button.operator:active {
+    background-color: peachpuff;
+}
