@@ -20,7 +20,7 @@ function operate(e) {
     } else {
         switch (pressed) {
             case '%':
-            case '\\':
+            case '/':
             case '*':
             case '-':
             case '+':
@@ -73,6 +73,10 @@ function setNumber(num) {
 
 }
 
+function roundNumber(num) {
+    return Math.round(num * 1000) / 1000;
+}
+
 function checkDecimal() {
     if (getNumber().indexOf('.') >= 0 || atMaxLength()) {
         return;
@@ -87,16 +91,25 @@ function atMaxLength() {
 }
 
 function updateOperator(operator) {
-    // console.table(operationStore);
-    operationStore.operator = operator;
+    // ah this seriously needs fixing
+    console.table(operationStore);
+    if (operationStore.operator === null) {
+        operationStore.operator = operator;
+    }
     if (operationStore.num1 === null) {
         operationStore.num1 = getNumber();
         operationStore.needClear = true;
-        return;
     } else if (operationStore.num2 === null) {
         operationStore.num2 = getNumber();
-    } else {
-        calculateResult();
+        // operationStore.needClear = true;
+    } 
+
+    if (operationStore.num1 !== null) {
+        if (operationStore.num2 !== null) {
+            calculateResult(); 
+        } else if (operationStore.operator === '=') {
+            calculateResult();
+        }
     }
 }
 
@@ -107,16 +120,21 @@ function calculateResult() {
         result = Number(operationStore.num1) + Number(operationStore.num2);
     } else if (operationStore.operator === '-') {
         result = Number(operationStore.num1) - Number(operationStore.num2);
-    } else if (operationStore.operator === '/') {
-        result = Number(operationStore.num1) / Number(operationStore.num2);
+    } else if (operationStore.operator === "/") {
+        if (operationStore.num2 === "0") {
+            updateNumber("ERROR");
+            return;
+        } else {
+            result = Number(operationStore.num1) / Number(operationStore.num2);
+        }
     } else if (operationStore.operator === '*') {
         result = Number(operationStore.num1) * Number(operationStore.num2);
-    } else if (operationStore.operator === null) {
+    } else if (operationStore.operator === null || operationStore.operator === '=') {
         result = Number(operationStore.num1) || 0; 
     }
 
-    setNumber(result);
-    operationStore.num1 = null;
+    setNumber(roundNumber(result));
+    operationStore.num1 = result;
     operationStore.num2 = null;
     operationStore.operator = null;
     operationStore.needClear = true;
