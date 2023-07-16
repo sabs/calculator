@@ -1,15 +1,17 @@
 const operationStore = {
     num1: null,
     operator: null,
+    nextOperator: null,
     num2: null,
     needClear: false,
+    newCalculation: false,
 }
 
 const buttons = document.querySelectorAll('#buttons button');
 buttons.forEach(item => item.addEventListener('click', operate));
 
 function operate(e) {
-    const pressed = e.target.textContent; 
+    const pressed = e.target.textContent;
 
     if (pressed >= 0 && pressed <= 9) {
         updateNumber(pressed);
@@ -24,10 +26,14 @@ function operate(e) {
             case '*':
             case '-':
             case '+':
-                updateOperator(pressed); break;
+                updateOperator(pressed);
+                processNumber();
+                break;
             case '=':
-                updateOperator(operationStore.operator);
-                calculateResult(); break;
+                operationStore.nextOperator = null;
+                processNumber();
+                operationStore.num1 = null;
+                break;
         }
     }
 }
@@ -44,8 +50,9 @@ function clearDisplay() {
 }
 
 function updateNumber(num) {
+    console.table(operationStore);
     if (operationStore.needClear) {
-        setNumber("0"); 
+        setNumber("0");
         operationStore.needClear = false;
     }
     const currentNumber = getNumber();
@@ -60,7 +67,7 @@ function updateNumber(num) {
     } else if (atMaxLength()) {
         return;
     } else {
-        setNumber(currentNumber + num); 
+        setNumber(currentNumber + num);
     }
 }
 
@@ -91,30 +98,31 @@ function atMaxLength() {
 }
 
 function updateOperator(operator) {
-    // ah this seriously needs fixing
-    console.table(operationStore);
-    if (operationStore.operator === null) {
+    if (operationStore.operator) {
+        operationStore.nextOperator = operator;
+    } else {
         operationStore.operator = operator;
     }
+}
+
+function processNumber() {
     if (operationStore.num1 === null) {
         operationStore.num1 = getNumber();
         operationStore.needClear = true;
     } else if (operationStore.num2 === null) {
-        operationStore.num2 = getNumber();
-        // operationStore.needClear = true;
-    } 
-
-    if (operationStore.num1 !== null) {
-        if (operationStore.num2 !== null) {
-            calculateResult(); 
-        } else if (operationStore.operator === '=') {
+        if (operationStore.operator === null) {
+            // fix behaviour after =
+            operationStore.num1 = getNumber();
+            operationStore.needClear = true;
+        } else {
+            operationStore.num2 = getNumber();
             calculateResult();
         }
     }
 }
 
 function calculateResult() {
-    console.log(operationStore);
+    console.table(operationStore);
     let result = 0;
     if (operationStore.operator === '+') {
         result = Number(operationStore.num1) + Number(operationStore.num2);
@@ -122,20 +130,37 @@ function calculateResult() {
         result = Number(operationStore.num1) - Number(operationStore.num2);
     } else if (operationStore.operator === "/") {
         if (operationStore.num2 === "0") {
-            updateNumber("ERROR");
-            return;
+            result = "ERROR"
         } else {
             result = Number(operationStore.num1) / Number(operationStore.num2);
         }
     } else if (operationStore.operator === '*') {
         result = Number(operationStore.num1) * Number(operationStore.num2);
     } else if (operationStore.operator === null || operationStore.operator === '=') {
-        result = Number(operationStore.num1) || 0; 
+        result = Number(operationStore.num1) || 0;
     }
 
-    setNumber(roundNumber(result));
-    operationStore.num1 = result;
+    displayResult(result);
+    cleanupAfterResult()
+}
+
+function displayResult(result) {
+    if (!(result === 'ERROR')) {
+        setNumber(roundNumber(result));
+        operationStore.num1 = result;
+    } else {
+        setNumber(result);
+    }
+}
+
+function cleanupAfterResult() {
     operationStore.num2 = null;
-    operationStore.operator = null;
+    if (operationStore.nextOperator) {
+        operationStore.operator = operationStore.nextOperator;
+        operationStore.nextOperator = null;
+    } else {
+        operationStore.operator = null;
+    }
     operationStore.needClear = true;
 }
+
