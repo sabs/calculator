@@ -19,6 +19,8 @@ function operate(e) {
         checkDecimal()
     } else if (pressed === "AC") {
         clearCalculator();
+    } else if (pressed === 'DEL') { 
+        backspace();
     } else {
         switch (pressed) {
             case '%':
@@ -43,6 +45,11 @@ function clearCalculator() {
     operationStore.operator = null;
     operationStore.num2 = null;
     clearDisplay();
+}
+
+function backspace() {
+    let current = getNumber();
+    setNumber(current.substring(0, current.length - 1)); 
 }
 
 function clearDisplay() {
